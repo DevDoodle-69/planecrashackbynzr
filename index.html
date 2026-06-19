@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Aviator · Predictor</title>
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0b0712;
+            background-image: radial-gradient(circle at 20% 30%, #1f1233, #08040e 80%);
+            padding: 20px;
+            margin: 0;
+            position: relative;
+        }
+
+        /* subtle animated bg glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -30%;
+            left: -10%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(90, 30, 180, 0.15) 0%, transparent 70%);
+            filter: blur(70px);
+            z-index: 0;
+            animation: floatGlow 18s infinite alternate ease-in-out;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+            100% { transform: translate(8%, 6%) scale(1.3); opacity: 0.7; }
+        }
+
+        .main-card {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            background: rgba(22, 14, 38, 0.65);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border-radius: 48px;
+            padding: 38px 28px 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(180, 130, 255, 0.15), 0 0 40px rgba(110, 40, 220, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.25s ease;
+        }
+
+        /* header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand i {
+            font-size: 26px;
+            color: #a97aff;
+            filter: drop-shadow(0 0 12px rgba(150, 80, 255, 0.6));
+        }
+
+        .brand span {
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #d6c6ff, #9f7aff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .badge-pro {
+            background: rgba(100, 200, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 60px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #a0d0ff;
+            border: 1px solid rgba(100, 180, 255, 0.2);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 0 20px rgba(70, 130, 255, 0.1);
+        }
+
+        .badge-pro i {
+            margin-right: 6px;
+            font-size: 10px;
+            color: #7ac7ff;
+        }
+
+        /* avatar */
+        .avatar-section {
+            display: flex;
+            justify-content: center;
+            margin: 12px 0 22px;
+        }
+
+        .avatar-ring {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            padding: 5px;
+            background: conic-gradient(from 0deg, #b37aff, #5f2cdb, #b37aff, #5f2cdb, #b37aff);
+            background-size: 300% 300%;
+            animation: spinGradient 8s linear infinite;
+            box-shadow: 0 0 40px rgba(130, 70, 255, 0.3);
+        }
+
+        @keyframes spinGradient {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 300% 300%; }
+        }
+
+        .avatar-ring img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+            border: 3px solid rgba(12, 6, 24, 0.8);
+            background: #1b112b;
+        }
+
+        .avatar-ring::after {
+            content: '';
+            position: absolute;
+            top: -8px; left: -8px; right: -8px; bottom: -8px;
+            border-radius: 50%;
+            border: 1.5px dashed rgba(190, 150, 255, 0.3);
+            animation: spinReverse 20s linear infinite;
+        }
+
+        @keyframes spinReverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        /* login form */
+        .lock-area {
+            transition: all 0.2s ease;
+        }
+
+        .lock-title {
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            color: rgba(200, 180, 240, 0.7);
+            text-align: center;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+
+        .lock-title i {
+            margin-right: 8px;
+            color: #9a7aff;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 18px;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(200, 180, 255, 0.4);
+            font-size: 16px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 18px 20px 18px 52px;
+            background: rgba(12, 6, 28, 0.6);
+            border: 1.5px solid rgba(140, 100, 220, 0.25);
+            border-radius: 60px;
+            color: #f0ecff;
+            font-size: 16px;
+            font-weight: 400;
+            letter-spacing: 0.8px;
+            transition: all 0.25s ease;
+            outline: none;
+            backdrop-filter: blur(6px);
+        }
+
+        .input-wrapper input:focus {
+            border-color: #a87aff;
+            box-shadow: 0 0 20px rgba(140, 80, 255, 0.2), inset 0 0 10px rgba(140, 80, 255, 0.1);
+            background: rgba(18, 10, 38, 0.7);
+        }
+
+        .input-wrapper input::placeholder {
+            color: rgba(200, 185, 240, 0.25);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 18px 10px;
+            background: linear-gradient(135deg, #7a4bff, #b06aff);
+            border: none;
+            border-radius: 60px;
+            color: white;
+            font-weight: 600;
+            font-size: 17px;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 24px rgba(100, 50, 220, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-primary i {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(120, 60, 255, 0.4);
+            background: linear-gradient(135deg, #8a5aff, #bf7aff);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .error-msg {
+            color: #ff6b8a;
+            font-size: 14px;
+            margin-top: 14px;
+            text-align: center;
+            display: none;
+            font-weight: 500;
+            background: rgba(255, 40, 80, 0.06);
+            padding: 10px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 60, 100, 0.15);
+            backdrop-filter: blur(4px);
+        }
+
+        .error-msg i {
+            margin-right: 8px;
+        }
+
+        /* generator panel */
+        .generator-area {
+            display: none;
+            animation: fadeSlide 0.4s ease;
+        }
+
+        @keyframes fadeSlide {
+            0% { opacity: 0; transform: translateY(14px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .prediction-display {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            margin: 14px auto 30px;
+            background: radial-gradient(circle at 30% 30%, rgba(40, 20, 80, 0.8), rgba(8, 2, 20, 0.9));
+            border: 2px solid rgba(160, 130, 255, 0.3);
+            box-shadow: 0 0 50px rgba(120, 70, 255, 0.2), inset 0 0 40px rgba(80, 40, 180, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 38px;
+            font-weight: 800;
+            color: #cbb5ff;
+            text-shadow: 0 0 20px rgba(160, 120, 255, 0.5);
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+            backdrop-filter: blur(4px);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .prediction-display i {
+            font-size: 20px;
+            margin-right: 6px;
+            color: #a87aff;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 6px;
+        }
+
+        .btn-generate {
+            flex: 1;
+            padding: 16px 10px;
+            background: linear-gradient(135deg, #2d1b4a, #170d2b);
+            border: 1px solid rgba(160, 130, 255, 0.15);
+            border-radius: 60px;
+            color: #d4c8ff;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s ease;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-generate i {
+            font-size: 16px;
+            color: #a97aff;
+        }
+
+        .btn-generate:hover {
+            background: linear-gradient(135deg, #3e2860, #22143a);
+            border-color: rgba(180, 150, 255, 0.3);
+            box-shadow: 0 6px 20px rgba(100, 50, 200, 0.25);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(0.5);
+        }
+
+        /* small watermark */
+        .watermark {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: rgba(180, 160, 220, 0.2);
+            letter-spacing: 0.6px;
+            font-weight: 300;
+            border-top: 1px solid rgba(255, 255, 255, 0.02);
+            padding-top: 20px;
+        }
+
+        .watermark i {
+            color: rgba(200, 160, 255, 0.25);
+            margin: 0 4px;
+        }
+
+        .watermark span {
+            color: rgba(200, 180, 240, 0.3);
+        }
+
+        /* responsive */
+        @media (max-width: 480px) {
+            .main-card {
+                padding: 28px 18px 30px;
+                border-radius: 36px;
+            }
+
+            .brand span {
+                font-size: 18px;
+            }
+
+            .prediction-display {
+                width: 130px;
+                height: 130px;
+                font-size: 30px;
+            }
+
+            .avatar-ring {
+                width: 100px;
+                height: 100px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .main-card {
+                padding: 20px 12px 24px;
+            }
+
+            .btn-primary, .btn-generate {
+                font-size: 14px;
+                padding: 14px 8px;
+            }
+        }
+
+        /* scrollbar hide */
+        ::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <!-- header -->
+    <div class="app-header">
+        <div class="brand">
+            <i class="fas fa-rocket"></i>
+            <span>Aviator</span>
+        </div>
+        <div class="badge-pro">
+            <i class="fas fa-bolt"></i> PRO
+        </div>
+    </div>
+
+    <!-- avatar -->
+    <div class="avatar-section">
+        <div class="avatar-ring">
+            <img src="https://drive.google.com/thumbnail?id=15EQ0CfGlZHhXLmJWVU5wSPQtZsFdPBz8&sz=w500" alt="avatar" loading="lazy">
+        </div>
+    </div>
+
+    <!-- LOCK FORM -->
+    <div id="lockForm" class="lock-area">
+        <div class="lock-title">
+            <i class="fas fa-lock"></i> ACCESS CODE
+        </div>
+        <div class="input-wrapper">
+            <i class="fas fa-key"></i>
+            <input type="password" id="passwordField" placeholder="Enter secure key" autocomplete="off">
+        </div>
+        <button class="btn-primary" onclick="checkPassword()">
+            <i class="fas fa-unlock-alt"></i> Unlock Predictor
+        </button>
+        <div class="error-msg" id="errorTxt">
+            <i class="fas fa-exclamation-circle"></i> Invalid code. Try again.
+        </div>
+    </div>
+
+    <!-- GENERATOR PANEL -->
+    <div id="generatorForm" class="generator-area">
+        <div class="prediction-display" id="resultCircle">
+            <i class="fas fa-chart-line"></i> 1.00x
+        </div>
+        <div class="action-row">
+            <button class="btn-generate" id="startBtn" onclick="startPrediction()">
+                <i class="fas fa-play"></i> Generate
+            </button>
+        </div>
+    </div>
+
+    <!-- watermark -->
+    <div class="watermark">
+        <i class="fas fa-heart" style="color: rgba(200, 160, 255, 0.15);"></i>
+        <span>Made with </span><i class="fas fa-heart" style="color: rgba(200, 160, 255, 0.2);"></i><span> by NZ R</span>
+    </div>
+</div>
+
+<!-- audio (background) -->
+<audio id="bgMusic" loop preload="auto">
+    <source src="https://docs.google.com/uc?export=download&id=1K-QJRJhRpz7A5P4nUq-g-DcQXLfguTWn" type="audio/mp3">
+</audio>
+
+<script>
+    (function() {
+        const CORRECT_PASSWORD = "nzr-11488";
+        const music = document.getElementById('bgMusic');
+
+        // force audio play on any user interaction (auto-play policy)
+        function attemptAudioPlay() {
+            music.volume = 0.8;
+            music.play().then(() => {
+                console.log('audio started');
+            }).catch(() => {});
+        }
+
+        // on load, try to play
+        window.addEventListener('DOMContentLoaded', () => {
+            // subtle auto-invoke
+            setTimeout(() => {
+                attemptAudioPlay();
+            }, 200);
+
+            // extra: any click/tap on document triggers audio
+            const resumeAudio = () => {
+                attemptAudioPlay();
+                document.removeEventListener('click', resumeAudio);
+                document.removeEventListener('touchstart', resumeAudio);
+            };
+            document.addEventListener('click', resumeAudio, { once: true });
+            document.addEventListener('touchstart', resumeAudio, { once: true });
+        });
+
+        // password check
+        window.checkPassword = function() {
+            const input = document.getElementById('passwordField');
+            const error = document.getElementById('errorTxt');
+            const lock = document.getElementById('lockForm');
+            const gen = document.getElementById('generatorForm');
+
+            if (input.value === CORRECT_PASSWORD) {
+                lock.style.display = 'none';
+                gen.style.display = 'block';
+                error.style.display = 'none';
+                attemptAudioPlay(); // ensure music
+                // reset prediction circle to default
+                const circle = document.getElementById('resultCircle');
+                circle.innerHTML = '<i class="fas fa-chart-line"></i> 1.00x';
+                circle.style.color = '#cbb5ff';
+                circle.style.borderColor = 'rgba(160, 130, 255, 0.3)';
+                circle.style.boxShadow = '0 0 50px rgba(120, 70, 255, 0.2), inset 0 0 40px rgba(80, 40, 180, 0.15)';
+                document.getElementById('startBtn').disabled = false;
+            } else {
+                error.style.display = 'block';
+                input.value = '';
+                input.focus();
+                // shake effect (optional)
+                error.style.animation = 'none';
+                setTimeout(() => { error.style.animation = 'fadeSlide 0.2s ease'; }, 10);
+            }
+        };
+
+        // prediction generator
+        window.startPrediction = function() {
+            const circle = document.getElementById('resultCircle');
+            const btn = document.getElementById('startBtn');
+            if (btn.disabled) return;
+
+            btn.disabled = true;
+            circle.style.transition = 'none';
+
+            // fast random rolling
+            let interval = setInterval(() => {
+                let val = (Math.random() * 4.8 + 0.9).toFixed(2);
+                circle.innerHTML = `<i class="fas fa-sync-alt fa-fw" style="font-size:20px;"></i> ${val}x`;
+                circle.style.color = '#f0b0ff';
+                circle.style.borderColor = '#b07aff';
+                circle.style.boxShadow = '0 0 60px rgba(170, 100, 255, 0.5), inset 0 0 30px rgba(130, 60, 220, 0.3)';
+            }, 55);
+
+            // final result after 1.8 sec
+            setTimeout(() => {
+                clearInterval(interval);
+                // multiplier between 1.10 and 5.00
+                let finalVal = (Math.random() * (5.00 - 1.10) + 1.10).toFixed(2);
+                circle.innerHTML = `<i class="fas fa-arrow-up" style="font-size:20px;"></i> ${finalVal}x`;
+                circle.style.color = '#b3e0ff';
+                circle.style.borderColor = '#70c8ff';
+                circle.style.boxShadow = '0 0 70px rgba(80, 180, 255, 0.5), inset 0 0 40px rgba(40, 120, 255, 0.2)';
+
+                // re-enable button after short cooldown
+                setTimeout(() => {
+                    btn.disabled = false;
+                }, 800);
+
+            }, 1800);
+        };
+
+        // enter key support
+        document.getElementById('passwordField').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                checkPassword();
+            }
+        });
+
+        // if generator is visible, allow enter to trigger start?
+        document.addEventListener('keydown', function(e) {
+            const gen = document.getElementById('generatorForm');
+            if (gen.style.display === 'block' && e.key === 'Enter' && !e.repeat) {
+                const btn = document.getElementById('startBtn');
+                if (!btn.disabled) {
+                    startPrediction();
+                }
+            }
+        });
+    })();
+</script>
+</body>
+</html>
